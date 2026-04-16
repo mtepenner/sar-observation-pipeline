@@ -41,7 +41,7 @@ The pipeline is divided into four highly specialized microservices:
 ### Setup Steps
 1. Clone the repository:
    ```bash
-   git clone [https://github.com/yourusername/sar-observation-pipeline.git](https://github.com/yourusername/sar-observation-pipeline.git)
+   git clone https://github.com/mtepenner/sar-observation-pipeline.git
    cd sar-observation-pipeline
    ```
 2. Spin up the entire infrastructure (PostGIS, MinIO, Airflow, FastAPI, and React) locally using Docker Compose:
