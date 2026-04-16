@@ -1,0 +1,58 @@
+sar-observation-pipeline/
+│
+├── .github/                             # Automated CI/CD pipelines
+│   └── workflows/
+│       ├── test-pipeline.yml            # Unit tests for the SAR math filters
+│       └── build-deploy.yml
+│
+├── data_extractor/                      # Python: The Distributed Processing Engine (Apache Airflow / Dask)
+│   ├── dags/
+│   │   └── sentinel_ingestion.py        # Orchestration logic to run the pipeline nightly
+│   ├── internal/
+│   │   ├── downloader/
+│   │   │   └── asf_client.py            # Pulls raw Sentinel-1 GRD/SLC data from the Alaska Satellite Facility API
+│   │   ├── processing/
+│   │   │   ├── calibration.py           # Radiometric calibration (translating digital numbers to radar backscatter)
+│   │   │   ├── speckle_filter.py        # Applies Lee or Frost filters to remove radar "noise"
+│   │   │   └── terrain_correction.py    # Flattens the radar image over a digital elevation model (DEM)
+│   │   └── analytics/
+│   │       ├── change_detection.py      # Computes the difference between two temporal passes (e.g., deforestation)
+│   │       └── vectorizer.py            # Converts raster changes (pixels) into searchable vector polygons
+│   ├── requirements.txt                 # Includes rasterio, geopandas, dask, xarray
+│   └── Dockerfile                       # Heavy compute container
+│
+├── spatial_api/                         # Python + FastAPI: High-Performance Query Backend
+│   ├── app/
+│   │   ├── api/
+│   │   │   └── routes/
+│   │   │       ├── vector_tiles.py      # Serves dynamic Mapbox Vector Tiles (MVT) from the database
+│   │   │       └── temporal.py          # Queries the time-series history of a specific latitude/longitude
+│   │   ├── core/
+│   │   │   └── postgis_client.py        # Connection pooling for the spatial database
+│   │   └── main.py
+│   ├── requirements.txt                 # Includes fastapi, asyncpg, sqlalchemy
+│   └── Dockerfile
+│
+├── map_frontend/                        # React + TypeScript: The WebGL Visualization Dashboard
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── DeckGLMap.tsx            # High-performance WebGL canvas handling millions of polygons
+│   │   │   ├── TimeSlider.tsx           # Scrubber to animate historical changes (e.g., ice shelf collapse)
+│   │   │   └── AnalysisSidebar.tsx      # Displays computed metrics (e.g., "Sq Km of Deforestation") for the viewport
+│   │   ├── hooks/
+│   │   │   └── useVectorData.ts         # Manages fetching and caching spatial tiles as the user pans/zooms
+│   │   ├── App.tsx
+│   │   └── index.tsx
+│   ├── package.json                     # Needs deck.gl, maplibre-gl, react-map-gl
+│   └── Dockerfile
+│
+├── infrastructure/                      # Kubernetes and Data Storage Orchestration
+│   ├── postgis.yaml                     # PostgreSQL database with PostGIS extension for spatial math
+│   ├── minio.yaml                       # S3-compatible local object storage for the massive raw raster files
+│   ├── airflow/                         # Helm charts or manifests for the Airflow task scheduler
+│   ├── api-deployment.yaml
+│   └── ingress.yaml
+│
+├── docker-compose.yml                   # Spins up PostGIS, MinIO, Airflow, FastAPI, and React locally
+├── Makefile                             # Shortcuts for triggering pipeline DAGs and building containers
+└── README.md
