@@ -79,7 +79,13 @@ def search_granules(
     response = session.get(ASF_SEARCH_URL, params=params, timeout=30)
     response.raise_for_status()
     data = response.json()
-    results = data[0] if data else []
+    # ASF API may return a nested list [[...]] or a flat list of dicts.
+    if isinstance(data, list) and data and isinstance(data[0], list):
+        results = data[0]
+    elif isinstance(data, list):
+        results = data
+    else:
+        results = []
     logger.info("ASF search returned %d granules.", len(results))
     return results
 

@@ -28,7 +28,7 @@ interface DeckGLMapProps {
 const DeckGLMap: React.FC<DeckGLMapProps> = ({ selectedDate, onFeatureClick }) => {
   const [cursor, setCursor] = useState<string>("grab");
 
-  const tilesUrl = `${import.meta.env.VITE_API_URL ?? ""}/tiles/{z}/{x}/{y}.mvt`;
+  const tilesUrl = `${import.meta.env.VITE_API_URL ?? ""}/tiles/{z}/{x}/{y}.mvt?date=${encodeURIComponent(selectedDate)}`;
 
   const changesLayer = new MVTLayer({
     id: "sar-changes",
@@ -41,6 +41,9 @@ const DeckGLMap: React.FC<DeckGLMapProps> = ({ selectedDate, onFeatureClick }) =
     highlightColor: [255, 255, 0, 200],
     onClick: onFeatureClick,
     onHover: ({ object }) => setCursor(object ? "pointer" : "grab"),
+    updateTriggers: {
+      data: selectedDate,
+    },
   });
 
   return (
